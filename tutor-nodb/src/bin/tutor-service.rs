@@ -27,6 +27,7 @@ async fn main() -> io::Result<()> {
         App::new()
             .app_data(shared_data.clone())  // 웹 애플리케이션에 애플리케이션 상태 등록
             .configure(general_routes)
+            .configure(course_routes)
     };
 
     HttpServer::new(app).bind("127.0.0.1:3000")?.run().await

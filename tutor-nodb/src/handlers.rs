@@ -1,5 +1,7 @@
+use super::models::Course;
 use super::state::AppState;
 use actix_web::{web, HttpResponse};
+use chrono::Utc;
 
 // Actix 웹 애플리케이션에 등록된 애플리케이션 상태는 자동으로 모든 핸들러 함수들이 web::Data<T> 라는 추출자 객체(extractor object)를 사용해 접근할 수 있음
 pub async fn health_check_handler(app_state: web::Data<AppState>) -> HttpResponse {
@@ -10,4 +12,54 @@ pub async fn health_check_handler(app_state: web::Data<AppState>) -> HttpRespons
     *visit_count += 1;
 
     HttpResponse::Ok().json(&response)
+}
+
+pub async fn new_course(
+    new_course: web::Json<Course>,
+    app_state: web::Data<AppState>,
+) -> HttpResponse {
+    println!("Received new course");
+
+    let course_count_for_user = app_state
+        .courses
+        .lock()
+        .unwrap()
+        .clone()
+        .into_iter()
+        .filter(|course| course.tutor_id == new_course.tutor_id)
+        .count();
+
+    let new_course = Course {
+        tutor_id: new_course.tutor_id,
+        course_id: Some((course_count_for_user + 1).try_into().unwrap()),
+        course_name: new_course.course_name.clone(),
+        posted_time: Some(Utc::now().naive_utc()),
+    };
+
+    app_state.courses.lock().unwrap().push(new_course);
+    HttpResponse::Ok().json("Added course")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::http::StatusCode;
+    use std::sync::Mutex;
+
+    #[actix_rt::test]
+    async fn post_course_test() {
+        let course = web::Json(Course {
+            tutor_id: 1,
+            course_name: "Hello, this is test course".into(),
+            course_id: None,
+            posted_time: None,
+        });
+        let app_state :web::Data<AppState> = web::Data::new(AppState {
+            health_check_response: "".to_string(),
+            visit_count: Mutex::new(0),
+            courses: Mutex::new(vec![]),
+        });
+        let resp = new_course(course, app_state).await;
+        assert_eq!(resp.status(), StatusCode::OK);        
+    }
 }
