@@ -19,3 +19,6 @@ actix-rt = "2.7.0"
 serde = { version = "1.0.110", features = ["derive"]}
 # 다른 유틸리티
 chrono = { version = "0.4.11", features = ["serde"]}
+# API Documentation 라이브러리
+apistos = { version = "0.4.2", features = ["swagger-ui"] }
+schemars = { package = "apistos-schemars", version = "0.8" }

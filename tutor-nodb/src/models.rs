@@ -1,8 +1,10 @@
 use actix_web::web;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use apistos::ApiComponent;
+use schemars::JsonSchema;
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, JsonSchema, ApiComponent)]
 pub struct Course {
     pub tutor_id: i32,
     pub course_id: Option<i32>,

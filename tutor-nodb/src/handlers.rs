@@ -2,6 +2,7 @@ use super::models::Course;
 use super::state::AppState;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
+use apistos::{api_operation, ApiComponent};
 
 // Actix 웹 애플리케이션에 등록된 애플리케이션 상태는 자동으로 모든 핸들러 함수들이 web::Data<T> 라는 추출자 객체(extractor object)를 사용해 접근할 수 있음
 pub async fn health_check_handler(app_state: web::Data<AppState>) -> HttpResponse {
@@ -14,6 +15,7 @@ pub async fn health_check_handler(app_state: web::Data<AppState>) -> HttpRespons
     HttpResponse::Ok().json(&response)
 }
 
+#[api_operation(summary = "Add new course")]
 pub async fn new_course(
     new_course: web::Json<Course>,
     app_state: web::Data<AppState>,
@@ -40,6 +42,7 @@ pub async fn new_course(
     HttpResponse::Ok().json("Added course")
 }
 
+#[api_operation(summary = "get courses list")]
 pub async fn get_courses_for_tutor(
     app_state: web::Data<AppState>,
     params: web::Path<i32>,
@@ -62,6 +65,7 @@ pub async fn get_courses_for_tutor(
     }
 }
 
+#[api_operation(summary = "get course detail")]
 pub async fn get_course_detail(
     app_state: web::Data<AppState>,
     params: web::Path<(i32, i32)>,
