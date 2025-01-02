@@ -2,7 +2,9 @@ use super::models::Course;
 use super::state::AppState;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
-use apistos::{api_operation, ApiComponent};
+use actix_web::{get, post, App};
+
+const COURSE: &str = "course";
 
 // Actix 웹 애플리케이션에 등록된 애플리케이션 상태는 자동으로 모든 핸들러 함수들이 web::Data<T> 라는 추출자 객체(extractor object)를 사용해 접근할 수 있음
 pub async fn health_check_handler(app_state: web::Data<AppState>) -> HttpResponse {
@@ -15,7 +17,14 @@ pub async fn health_check_handler(app_state: web::Data<AppState>) -> HttpRespons
     HttpResponse::Ok().json(&response)
 }
 
-#[api_operation(summary = "Add new course")]
+/// Create new course to in-memory storage.
+#[utoipa::path(
+    tag = COURSE,
+    responses(
+        (status = 200, description = "course added successfully"),
+    )
+)]
+#[post("/")]
 pub async fn new_course(
     new_course: web::Json<Course>,
     app_state: web::Data<AppState>,
@@ -42,7 +51,17 @@ pub async fn new_course(
     HttpResponse::Ok().json("Added course")
 }
 
-#[api_operation(summary = "get courses list")]
+/// get list courses of tutor by given tutor id.
+#[utoipa::path(
+    tag = COURSE,
+    responses(
+        (status = 200, description = "courses found from storage", body = [Course]) 
+    ),
+    params(
+        ("tutor_id", description = "Unique id of tutor")
+    )
+)]
+#[get("/{tutor_id}")]
 pub async fn get_courses_for_tutor(
     app_state: web::Data<AppState>,
     params: web::Path<i32>,
@@ -65,7 +84,18 @@ pub async fn get_courses_for_tutor(
     }
 }
 
-#[api_operation(summary = "get course detail")]
+/// get course by given tutor id and course id
+#[utoipa::path(
+    tag = COURSE,
+    responses(
+        (status = 200, description = "course found from storage", body = [Course])
+    ),
+    params(
+        ("tutor_id", description = "Unique id of tutor"),
+        ("course_id", description = "Unique id of course of tutor"),
+    )
+)]
+#[get("/{tutor_id}/{course_id}")]
 pub async fn get_course_detail(
     app_state: web::Data<AppState>,
     params: web::Path<(i32, i32)>,
