@@ -44,9 +44,9 @@ async fn main() -> io::Result<()> {
             .into_utoipa_app()
             .openapi(ApiDoc::openapi())
             .map(|app| app.wrap(Logger::default()))
-            .service(
-                utoipa_actix_web::scope("/courses")
-                    .configure(routes::course_routes(shared_data.clone())),
+            .app_data(shared_data.clone())
+            .configure(
+                routes::course_routes(),
             )
             .openapi_service(|api| {
                 SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", api)
