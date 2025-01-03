@@ -1,8 +1,7 @@
 use super::models::Course;
 use super::state::AppState;
-use actix_web::{web, HttpResponse};
+use actix_web::{get, post, web, HttpResponse};
 use chrono::Utc;
-use actix_web::{get, post, App};
 
 const COURSE: &str = "course";
 
@@ -100,7 +99,7 @@ pub async fn get_course_detail(
     app_state: web::Data<AppState>,
     params: web::Path<(i32, i32)>,
 ) -> HttpResponse {
-    let (tutor_id, course_id)= params.into_inner();
+    let (tutor_id, course_id) = params.into_inner();
 
     let seleted_course = app_state
         .courses
@@ -121,23 +120,39 @@ pub async fn get_course_detail(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use actix_web::http::StatusCode;
+    use actix_web::{http::StatusCode, test, web, App};
     use std::sync::Mutex;
 
     #[actix_rt::test]
     async fn post_course_test() {
+        let app_state: web::Data<AppState> = web::Data::new(AppState {
+            health_check_response: "".to_string(),
+            visit_count: Mutex::new(0),
+            courses: Mutex::new(vec![]),
+        });
+
+        let app = test::init_service(
+            App::new()
+                .app_data(app_state)
+                .service(new_course)
+        ).await;
+
         let course = web::Json(Course {
             tutor_id: 1,
             course_name: "Hello, this is test course".into(),
             course_id: None,
             posted_time: None,
         });
-        let app_state: web::Data<AppState> = web::Data::new(AppState {
-            health_check_response: "".to_string(),
-            visit_count: Mutex::new(0),
-            courses: Mutex::new(vec![]),
-        });
-        let resp = new_course(course, app_state).await;
+
+        let req = test::TestRequest::post()
+            .uri("/")
+            .set_json(course)
+            .to_request();
+
+        let resp = test::call_service(&app, req).await;
+        let full_url = String::from(resp.request().full_url());
+        println!("post url: {}", full_url);
+
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
@@ -148,9 +163,22 @@ mod tests {
             visit_count: Mutex::new(0),
             courses: Mutex::new(vec![]),
         });
-        let tutor_id: web::Path<i32> = web::Path::from(1);
 
-        let resp = get_courses_for_tutor(app_state, tutor_id).await;
+        let app = test::init_service(
+            App::new()
+                .app_data(app_state)
+                .service(get_courses_for_tutor),
+        ).await;
+
+        // let tutor_id: web::Path<i32> = web::Path::from(1);
+        let req = test::TestRequest::get()
+            .uri("/1")
+            .param("tutor_id", "1")
+            .to_request();
+
+        let resp = test::call_service(&app, req).await;
+        let full_url = String::from(resp.request().full_url());
+        println!("get url {}", full_url);
 
         assert_eq!(resp.status(), StatusCode::OK);
     }
@@ -162,9 +190,16 @@ mod tests {
             visit_count: Mutex::new(0),
             courses: Mutex::new(vec![]),
         });
-        let params: web::Path<(i32, i32)> = web::Path::from((1, 1));
 
-        let resp = get_course_detail(app_state, params).await;
+        let app = test::init_service(
+            App::new()
+                .app_data(app_state)
+                .service(get_course_detail)
+        ).await;
+
+        // let params: web::Path<(i32, i32)> = web::Path::from((1, 1));
+        let req = test::TestRequest::get().uri("/1/1").to_request();
+        let resp = test::call_service(&app, req).await;
 
         assert_eq!(resp.status(), StatusCode::OK);
     }

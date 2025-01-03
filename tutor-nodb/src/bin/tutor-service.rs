@@ -2,11 +2,12 @@ use actix_web::{
     middleware::Logger,
     web, App, HttpServer
 };
-use utoipa_actix_web::AppExt;
-use utoipa_swagger_ui::SwaggerUi;
+use routes::general_routes;
 use std::io;
 use std::sync::Mutex;
-use utoipa::{openapi, OpenApi};
+use utoipa::OpenApi;
+use utoipa_actix_web::AppExt;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[path = "../handlers.rs"]
 mod handlers;
@@ -17,7 +18,6 @@ mod routes;
 #[path = "../state.rs"]
 mod state;
 
-use routes::*;
 use state::AppState;
 
 #[actix_rt::main]
@@ -31,7 +31,7 @@ async fn main() -> io::Result<()> {
         )
     )]
     struct ApiDoc;
-    
+
     // 애플리케이션 상태 초기화
     let shared_data = web::Data::new(AppState {
         health_check_response: "I'm good. You've alread asked me ".to_string(),
@@ -44,11 +44,15 @@ async fn main() -> io::Result<()> {
             .into_utoipa_app()
             .openapi(ApiDoc::openapi())
             .map(|app| app.wrap(Logger::default()))
-            .service(utoipa_actix_web::scope("/courses").configure(routes::course_routes(shared_data.clone())))
+            .service(
+                utoipa_actix_web::scope("/courses")
+                    .configure(routes::course_routes(shared_data.clone())),
+            )
             .openapi_service(|api| {
                 SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", api)
             })
             .into_app()
+            .configure(general_routes)
     };
 
     HttpServer::new(app).bind("127.0.0.1:3000")?.run().await

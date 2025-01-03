@@ -24,3 +24,4 @@ env_logger = "0.11"
 utoipa = { version = "5.3.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "8", features = ["actix-web"] }
 utoipa-actix-web = "0.1.2"
+actix-web-codegen = "4.3.0"
