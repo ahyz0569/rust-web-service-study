@@ -1,0 +1,23 @@
+[package]
+name = "tutor-db"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Actix web framework & run-time
+actix-web = "4.2.1"
+actix-rt = "2.7.0"
+
+# 환경 변수 접근 라이브러리
+dotenv = "0.15.0"
+
+# PostgreSQL 접근 라이브러리
+sqlx = { version = "0.8.3", default_features = false, features = ["postgres", "runtime-tokio", "macros", "chrono"]}
+
+# Data 직렬화 라이브러리
+serde = { version = "1.0.110", features = ["derive"]}
+# 다른 유틸리티
+chrono = { version = "0.4.11", features = ["serde"]}
+
+# 빌드를 위한 Openssl이 개발 서버에 설치되어 있지 않은 경우
+openssl = { version = "0.10.41", features = ["vendored"]}
