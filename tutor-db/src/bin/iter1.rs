@@ -1,5 +1,4 @@
 use dotenv::dotenv;
-use openssl::derive;
 use std::env;
 use std::io;
 use sqlx::postgres::PgPool;
