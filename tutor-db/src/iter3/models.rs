@@ -12,10 +12,11 @@ pub struct Course {
 
 impl From<web::Json<Course>> for Course {
     fn from(value: web::Json<Course>) -> Self {
-        Course { 
+        Course {
             course_id: value.course_id,
             tutor_id: value.tutor_id,
             course_name: value.course_name.clone(),
-            posted_time: value.posted_time }
+            posted_time: value.posted_time,
+        }
     }
 }

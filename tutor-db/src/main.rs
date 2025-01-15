@@ -3,7 +3,7 @@ use std::{fmt, fs::File, io::Write, num::ParseIntError};
 #[derive(Debug)]
 pub enum MyError {
     ParseError,
-    IOError
+    IOError,
 }
 
 // 러스트의 error 타입은 러스트 표준 라이브러리의 Error 타입을 구현한다
@@ -25,7 +25,7 @@ fn main() {
     let result = square("INVALID");
     match result {
         Ok(res) => println!("Result is {:?}", res),
-        Err(e) => println!("Error in parsing: {:?}", e)
+        Err(e) => println!("Error in parsing: {:?}", e),
     };
 }
 
@@ -33,9 +33,10 @@ fn square(val: &str) -> Result<i32, MyError> {
     let num = val.parse::<i32>().map_err(|_| MyError::ParseError)?;
 
     let mut f = File::open("fictionalfile.txt").map_err(|_| MyError::IOError)?;
-    
+
     let string_to_write = format!("Square of {} is {}", num, i32::pow(num, 2));
-    f.write_all(string_to_write.as_bytes()).map_err(|_| MyError::IOError)?;
+    f.write_all(string_to_write.as_bytes())
+        .map_err(|_| MyError::IOError)?;
 
     Ok(i32::pow(num, 2))
 }

@@ -8,9 +8,8 @@ pub fn general_routes(config: &mut web::ServiceConfig) {
 pub fn course_routes(config: &mut web::ServiceConfig) {
     config.service(
         web::scope("/courses")
-        .route("/", web::post().to(post_new_course))
-        .route("/{tutor_id}", web::get().to(get_courses_for_tutor))
-        .route("/{tutor_id}/{course_id}", web::get().to(get_course_details))
+            .route("/", web::post().to(post_new_course))
+            .route("/{tutor_id}", web::get().to(get_courses_for_tutor))
+            .route("/{tutor_id}/{course_id}", web::get().to(get_course_details)),
     );
 }
-
