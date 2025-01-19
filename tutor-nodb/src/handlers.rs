@@ -1,6 +1,11 @@
 use super::models::Course;
 use super::state::AppState;
-use actix_web::{get, post, web, HttpResponse};
+use actix_web::{
+    get, post,
+    web::{self, Json},
+    HttpResponse,
+};
+use actix_web_validation::Validated;
 use chrono::Utc;
 
 const COURSE: &str = "course";
@@ -25,7 +30,7 @@ pub async fn health_check_handler(app_state: web::Data<AppState>) -> HttpRespons
 )]
 #[post("/")]
 pub async fn new_course(
-    new_course: web::Json<Course>,
+    Validated(Json(new_course)): Validated<Json<Course>>,
     app_state: web::Data<AppState>,
 ) -> HttpResponse {
     println!("Received new course");
@@ -131,11 +136,7 @@ mod tests {
             courses: Mutex::new(vec![]),
         });
 
-        let app = test::init_service(
-            App::new()
-                .app_data(app_state)
-                .service(new_course)
-        ).await;
+        let app = test::init_service(App::new().app_data(app_state).service(new_course)).await;
 
         let course = web::Json(Course {
             tutor_id: 1,
@@ -168,7 +169,8 @@ mod tests {
             App::new()
                 .app_data(app_state)
                 .service(get_courses_for_tutor),
-        ).await;
+        )
+        .await;
 
         // let tutor_id: web::Path<i32> = web::Path::from(1);
         let req = test::TestRequest::get()
@@ -191,11 +193,8 @@ mod tests {
             courses: Mutex::new(vec![]),
         });
 
-        let app = test::init_service(
-            App::new()
-                .app_data(app_state)
-                .service(get_course_detail)
-        ).await;
+        let app =
+            test::init_service(App::new().app_data(app_state).service(get_course_detail)).await;
 
         // let params: web::Path<(i32, i32)> = web::Path::from((1, 1));
         let req = test::TestRequest::get().uri("/1/1").to_request();

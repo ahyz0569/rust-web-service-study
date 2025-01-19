@@ -4,7 +4,7 @@ use std::io;
 // route 구성
 pub fn general_routes(cfg: &mut web::ServiceConfig) {
     // '/health' 경로로 유입되는 HTTP GET 요청을 health_check_handler()로 전달
-    cfg.route("/health", web::get().to(health_check_handler));    
+    cfg.route("/health", web::get().to(health_check_handler));
 }
 
 // handler 구성

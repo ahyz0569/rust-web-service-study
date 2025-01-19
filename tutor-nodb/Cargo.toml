@@ -15,6 +15,9 @@ name = "tutor-service"
 # Actix web framework & run-time
 actix-web = "4.2.1"
 actix-rt = "2.7.0"
+actix-web-validation = { version = "0.7.0", features = ["validator"] }
+validator = { version = "0.19", features = ["derive"] }
+
 # Data 직렬화 라이브러리
 serde = { version = "1.0.110", features = ["derive"]}
 # 다른 유틸리티

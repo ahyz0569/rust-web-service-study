@@ -2,15 +2,22 @@ use actix_web::web;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use validator::Validate;
 
-#[derive(Deserialize, Serialize, ToSchema, Debug, Clone)]
+#[derive(Deserialize, Serialize, ToSchema, Debug, Clone, Validate)]
 pub struct Course {
+    #[validate(range(min = 1, max = 100, message = "100 이하의 값을 입력하세요"))]
     #[schema(example = 1)]
     pub tutor_id: i32,
+
+    #[validate(range(min = 1, max = 100))]
     #[schema(example = 1)]
     pub course_id: Option<i32>,
+
+    #[validate(length(min = 3, message = "3글자 이상 입력하세요"))]
     #[schema(example = "first course!")]
     pub course_name: String,
+
     #[schema(value_type = String, format = DateTime)]
     pub posted_time: Option<NaiveDateTime>,
 }
